@@ -5,6 +5,27 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import re
 
+import logging
+
+# Konfigurasi logging
+logging.basicConfig(
+    level=logging.DEBUG,  # Level log
+    format="%(asctime)s - %(levelname)s - %(message)s",  # Format log
+    handlers=[
+        logging.StreamHandler(),  # Log ke console
+        logging.FileHandler("app_debug.log")  # Simpan log ke file
+    ]
+)
+
+# Debug untuk modul langdetect
+try:
+    from langdetect import detect
+    logging.info("Pustaka 'langdetect' berhasil dimuat.")
+except ModuleNotFoundError:
+    logging.critical("Pustaka 'langdetect' tidak ditemukan! Pastikan diinstal dengan benar.")
+    raise  # Untuk menghentikan program jika dependensi penting tidak ada
+
+
 # Kamus kata positif dan negatif untuk analisis Bahasa Indonesia
 positive_words = ["baik", "puas", "hebat", "bagus", "indah", "terima kasih", "senang", "suka", "luar biasa", "memuaskan", "ramah", "cepat", "mantap", "bagus sekali", "menyenangkan"]
 negative_words = ["buruk", "jelek", "kecewa", "benci", "sedih", "marah", "tidak puas", "payah", "mengecewakan", "parah", "lambat", "sombong", "melelahkan", "tidak ramah", "parah sekali"]
