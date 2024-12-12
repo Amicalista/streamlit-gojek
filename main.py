@@ -1,25 +1,30 @@
 import streamlit as st
 import pandas as pd
+from langdetect import detect
 import matplotlib.pyplot as plt
 from datetime import datetime
 import re
-import fasttext
+
 import logging
 
-# Muat model deteksi bahasa
-model = fasttext.load_model('lid.176.bin')
+# Konfigurasi logging
+logging.basicConfig(
+    level=logging.DEBUG,  # Level log
+    format="%(asctime)s - %(levelname)s - %(message)s",  # Format log
+    handlers=[
+        logging.StreamHandler(),  # Log ke console
+        logging.FileHandler("app_debug.log")  # Simpan log ke file
+    ]
+)
 
-# Fungsi untuk mendeteksi bahasa menggunakan fasttext
-def detect_language(text):
-    try:
-        logging.info("Mendeteksi bahasa dengan fasttext...")
-        prediction = model.predict(text)
-        lang = prediction[0][0].replace('__label__', '')
-        logging.debug(f"Bahasa terdeteksi: {lang}")
-        return lang
-    except Exception as e:
-        logging.error(f"Error saat mendeteksi bahasa: {e}")
-        return "unknown"
+# Debug untuk modul langdetect
+try:
+    from langdetect import detect
+    logging.info("Pustaka 'langdetect' berhasil dimuat.")
+except ModuleNotFoundError:
+    logging.critical("Pustaka 'langdetect' tidak ditemukan! Pastikan diinstal dengan benar.")
+    raise  # Untuk menghentikan program jika dependensi penting tidak ada
+
 
 # Kamus kata positif dan negatif untuk analisis Bahasa Indonesia
 positive_words = ["baik", "puas", "hebat", "bagus", "indah", "terima kasih", "senang", "suka", "luar biasa", "memuaskan", "ramah", "cepat", "mantap", "bagus sekali", "menyenangkan"]
@@ -42,6 +47,14 @@ def analyze_sentiment_id(text):
         return "Negatif", negative_score - positive_score
     else:
         return "Netral", 0
+
+# Fungsi untuk mendeteksi bahasa
+def detect_language(text):
+    try:
+        lang = detect(text)
+        return lang
+    except:
+        return "unknown"
 
 # Fungsi untuk menyimpan data ke CSV
 def log_analysis(user_input, sentiment, score, lang):
@@ -130,4 +143,4 @@ if uploaded_file is not None:
         st.pyplot(fig)
     else:
         st.warning("Kolom teks tidak dipilih. Pastikan memilih kolom yang berisi teks.")
-
+        
