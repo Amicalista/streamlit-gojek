@@ -4,26 +4,58 @@ from langdetect import detect
 import matplotlib.pyplot as plt
 from datetime import datetime
 import re
-
 import logging
 
 # Konfigurasi logging
 logging.basicConfig(
-    level=logging.DEBUG,  # Level log
-    format="%(asctime)s - %(levelname)s - %(message)s",  # Format log
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),  # Log ke console
-        logging.FileHandler("app_debug.log")  # Simpan log ke file
+        logging.FileHandler("debug.log")  # Log ke file
     ]
 )
 
-# Debug untuk modul langdetect
+# Fungsi untuk mencoba impor pustaka
+def safe_import(module_name, alias=None):
+    try:
+        module = __import__(module_name)
+        if alias:
+            globals()[alias] = module
+        else:
+            globals()[module_name] = module
+        logging.info(f"Pustaka '{module_name}' berhasil dimuat.")
+    except ModuleNotFoundError:
+        logging.error(f"Pustaka '{module_name}' tidak ditemukan. Pastikan sudah diinstal.")
+        st.error(f"Pustaka '{module_name}' tidak ditemukan. Periksa dependencies Anda.")
+        raise  # Hentikan jika dependensi penting tidak ada
+
+# Impor pustaka dengan aman
+safe_import("pandas")
+safe_import("matplotlib.pyplot", alias="plt")
+safe_import("langdetect", alias="langdetect")
+from langdetect import detect  # Tetap digunakan untuk fungsi
+
+# Tes fungsi
 try:
-    from langdetect import detect
-    logging.info("Pustaka 'langdetect' berhasil dimuat.")
-except ModuleNotFoundError:
-    logging.critical("Pustaka 'langdetect' tidak ditemukan! Pastikan diinstal dengan benar.")
-    raise  # Untuk menghentikan program jika dependensi penting tidak ada
+    detect("Halo dunia!")
+    logging.info("Tes 'langdetect' berhasil.")
+except Exception as e:
+    logging.error(f"Kesalahan saat mengetes 'langdetect': {e}")
+    st.error("Gagal menjalankan tes 'langdetect'.")
+
+# Visualisasi tes matplotlib
+try:
+    fig, ax = plt.subplots()
+    ax.plot([1, 2, 3], [4, 5, 6], label="Tes")
+    ax.set_title("Tes Matplotlib Berhasil")
+    ax.legend()
+    st.pyplot(fig)
+    logging.info("Tes 'matplotlib' berhasil.")
+except Exception as e:
+    logging.error(f"Kesalahan saat mengetes 'matplotlib': {e}")
+    st.error("Gagal menjalankan tes 'matplotlib'.")
+
 
 
 # Kamus kata positif dan negatif untuk analisis Bahasa Indonesia
